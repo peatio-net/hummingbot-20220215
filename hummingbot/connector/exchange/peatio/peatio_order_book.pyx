@@ -7,7 +7,10 @@ from typing import (
 import ujson
 
 from aiokafka import ConsumerRecord
-from sqlalchemy.engine import RowProxy
+
+# PMC removing RowProxy WIP
+#from sqlalchemy.engine import RowProxy
+
 
 from hummingbot.logger import HummingbotLogger
 from hummingbot.core.event.events import TradeType
@@ -67,29 +70,51 @@ cdef class PeatioOrderBook(OrderBook):
             "asks": adjust_empty_amounts([msg["asks"]])
         }, timestamp=timestamp)
 
-    @classmethod
-    def snapshot_message_from_db(cls, record: RowProxy, metadata: Optional[Dict] = None) -> OrderBookMessage:
-        msg = record["json"] if type(record["json"])==dict else ujson.loads(record["json"])
-        if metadata:
-            msg.update(metadata)
-        return OrderBookMessage(OrderBookMessageType.SNAPSHOT, {
-            "trading_pair": msg["pair"],
-            "update_id": record.timestamp,
-            "bids": msg["bids"],
-            "asks": msg["asks"]
-        }, timestamp=record["timestamp"] * 1e-3)
-
-    @classmethod
-    def diff_message_from_db(cls, record: RowProxy, metadata: Optional[Dict] = None) -> OrderBookMessage:
-        msg = ujson.loads(record["json"])
+    def diff_message_from_exchange(cls,
+                                   msg: Dict[str, any],
+                                   timestamp: Optional[float] = None,
+                                   metadata: Optional[Dict] = None) -> OrderBookMessage:
+        """
+        Creates a diff message with the changes in the order book received from the exchange
+        :param msg: the changes in the order book
+        :param timestamp: the timestamp of the difference
+        :param metadata: a dictionary with extra information to add to the difference data
+        :return: a diff message with the changes in the order book notified by the exchange
+        """
         if metadata:
             msg.update(metadata)
         return OrderBookMessage(OrderBookMessageType.DIFF, {
-            "trading_pair": msg["pair"],
-            "update_id": record.timestamp,
-            "bids": msg["bids"],
-            "asks": msg["asks"]
-        }, timestamp=record["timestamp"] * 1e-3)
+            "trading_pair": msg["trading_pair"],
+            "first_update_id": msg["U"],
+            "update_id": msg["u"],
+            "bids": msg["b"],
+            "asks": msg["a"]
+        }, timestamp=timestamp)
+
+# PMC removing RowProxy WIP
+#    @classmethod
+#    def snapshot_message_from_db(cls, record: RowProxy, metadata: Optional[Dict] = None) -> OrderBookMessage:
+#        msg = record["json"] if type(record["json"])==dict else ujson.loads(record["json"])
+#        if metadata:
+#            msg.update(metadata)
+#        return OrderBookMessage(OrderBookMessageType.SNAPSHOT, {
+#            "trading_pair": msg["pair"],
+#            "update_id": record.timestamp,
+#            "bids": msg["bids"],
+#            "asks": msg["asks"]
+#        }, timestamp=record["timestamp"] * 1e-3)
+
+#    @classmethod
+#    def diff_message_from_db(cls, record: RowProxy, metadata: Optional[Dict] = None) -> OrderBookMessage:
+#        msg = ujson.loads(record["json"])
+#        if metadata:
+#            msg.update(metadata)
+#        return OrderBookMessage(OrderBookMessageType.DIFF, {
+#            "trading_pair": msg["pair"],
+#            "update_id": record.timestamp,
+#            "bids": msg["bids"],
+#            "asks": msg["asks"]
+#        }, timestamp=record["timestamp"] * 1e-3)
 
     @classmethod
     def snapshot_message_from_kafka(cls, record: ConsumerRecord, metadata: Optional[Dict] = None) -> OrderBookMessage:
@@ -116,20 +141,21 @@ cdef class PeatioOrderBook(OrderBook):
 
         }, timestamp=record.timestamp * 1e-3)
 
-    @classmethod
-    def trade_message_from_db(cls, record: RowProxy, metadata: Optional[Dict] = None):
-        msg = record["json"]
-        if metadata:
-            msg.update(metadata)
-        ts = record.timestamp
-        return OrderBookMessage(OrderBookMessageType.TRADE, {
-            "trading_pair": msg["market"],
-            "trade_type": msg["taker_type"],
-            "trade_id": msg["id"],
-            "update_id": ts,
-            "price": msg["price"],
-            "amount": msg["amount"]
-        }, timestamp=ts * 1e-3)  # not sure about this
+# PMC removing RowProxy WIP
+#    @classmethod
+#    def trade_message_from_db(cls, record: RowProxy, metadata: Optional[Dict] = None):
+#        msg = record["json"]
+#        if metadata:
+#            msg.update(metadata)
+#        ts = record.timestamp
+#        return OrderBookMessage(OrderBookMessageType.TRADE, {
+#            "trading_pair": msg["market"],
+#            "trade_type": msg["taker_type"],
+#            "trade_id": msg["id"],
+#            "update_id": ts,
+#            "price": msg["price"],
+#            "amount": msg["amount"]
+#        }, timestamp=ts * 1e-3)  # not sure about this
 
     @classmethod
     def trade_message_from_exchange(cls, msg: Dict[str, any], metadata: Optional[Dict] = None):

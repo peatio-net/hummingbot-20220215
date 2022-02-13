@@ -28,7 +28,7 @@ from hummingbot.core.utils.async_utils import safe_ensure_future, safe_gather
 
 from hummingbot.core.event.events import (
     MarketEvent,
-    TradeFee,
+#    TradeFee, PMC update TradeFee WIP
     OrderType,
     OrderFilledEvent,
     TradeType,
@@ -225,12 +225,15 @@ cdef class PeatioExchange(ExchangeBase):
         cdef:
             object maker_fee = Decimal(0.002)
             object taker_fee = Decimal(0.002)
-        if order_type is OrderType.LIMIT and fee_overrides_config_map["peatio_maker_fee"].value is not None:
-            return TradeFee(percent=fee_overrides_config_map["peatio_maker_fee"].value)
-        if order_type is OrderType.MARKET and fee_overrides_config_map["peatio_taker_fee"].value is not None:
-            return TradeFee(percent=fee_overrides_config_map["peatio_taker_fee"].value)
 
-        return TradeFee(percent=maker_fee if order_type is OrderType.LIMIT else taker_fee)
+#    TradeFee, PMC update TradeFee WIP
+#        if order_type is OrderType.LIMIT and fee_overrides_config_map["peatio_maker_fee"].value is not None:
+#            return TradeFee(percent=fee_overrides_config_map["peatio_maker_fee"].value)
+#        if order_type is OrderType.MARKET and fee_overrides_config_map["peatio_taker_fee"].value is not None:
+#            return TradeFee(percent=fee_overrides_config_map["peatio_taker_fee"].value)
+#
+#        return TradeFee(percent=maker_fee if order_type is OrderType.LIMIT else taker_fee)
+        return 0
 
     async def _update_balances(self):
         cdef:
