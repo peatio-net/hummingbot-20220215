@@ -39,9 +39,12 @@ class Constants:
 #    TOKEN_URL = "https://accounts.probit.{}/token"
 
 #   /api/v2/peatio/public/markets/tickers
-    EXCHANGE_INFO_URL = f"{REST_URL_PUBLIC}/markets"
-    TICKER_PRICE_CHANGE_URL = f"{REST_URL_PUBLIC}/markets/tickers"
-    SINGLE_MARKET_DEPTH_URL = f"{REST_URL_PUBLIC}"+"/markets/{}/depth"
+#    EXCHANGE_INFO_URL = f"{REST_URL_PUBLIC}/markets"
+#    TICKER_PRICE_CHANGE_URL = f"{REST_URL_PUBLIC}/markets/tickers"
+#    SINGLE_MARKET_DEPTH_URL = f"{REST_URL_PUBLIC}"+"/markets/{}/depth"
+    EXCHANGE_INFO_URL = "/markets"
+    TICKER_PRICE_CHANGE_URL = "/markets/tickers"
+    SINGLE_MARKET_DEPTH_URL = "/markets/{}/depth"
 
     #DIFF_STREAM_URL = f"{WS_URL_PUBLIC}"
 
@@ -107,7 +110,7 @@ class Constants:
     # One minute should be fine since we get trades, orders and balances via WS
     LONG_POLL_INTERVAL = 60.0
     UPDATE_ORDER_STATUS_INTERVAL = 60.0
-    
+
     # 10 minute interval to update trading rules, these would likely never change whilst running.
     INTERVAL_TRADING_RULES = 600
 
