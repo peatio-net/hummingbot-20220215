@@ -1105,5 +1105,7 @@ cdef class PeatioExchange(ExchangeBase):
                 order_type: OrderType,
                 order_side: TradeType,
                 amount: Decimal,
-                price: Decimal = s_decimal_NaN) -> TradeFee:
+                price: Decimal = s_decimal_NaN) -> TradeFeeBase:
         return self.c_get_fee(base_currency, quote_currency, order_type, order_side, amount, price)
+#                price: Decimal = s_decimal_NaN) -> TradeFee:
+
