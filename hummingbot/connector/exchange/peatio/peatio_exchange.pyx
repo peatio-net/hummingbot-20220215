@@ -284,6 +284,8 @@ cdef class PeatioExchange(ExchangeBase):
             int64_t last_tick = <int64_t> (self._last_timestamp / 60.0)
             int64_t current_tick = <int64_t> (self._current_timestamp / 60.0)
 
+            self.logger().info(f"PMC line 287 last_tick = {last_tick}, current_tick = {current_tick}")
+
         if current_tick > last_tick or len(self._trading_rules) <= 0:
 
             market_path_url = Constants.GET_MARKET
@@ -293,7 +295,10 @@ cdef class PeatioExchange(ExchangeBase):
             market_list = await self._api_request("GET", path_url=market_path_url)
 
             ticker_list = await self._api_request("GET", path_url=ticker_path_url)
+
             ticker_data = {symbol: item['ticker'] for symbol, item in ticker_list.items()}
+
+            self.logger().info(f"PMC line 301 \n\nmarket_list = {market_list}, \n\nticker_list = {ticker_list}, \n\nticker_data = {ticker_data}")
 
             result_list = {
                 market["id"]: {**market, **ticker_data[market["id"]]}
@@ -302,7 +307,9 @@ cdef class PeatioExchange(ExchangeBase):
             }
 
             trading_rules_list = self._format_trading_rules(result_list)
+
             self._trading_rules.clear()
+
             for trading_rule in trading_rules_list:
                 self._trading_rules[trading_rule.trading_pair] = trading_rule
 
@@ -936,6 +943,7 @@ cdef class PeatioExchange(ExchangeBase):
                 raise ValueError
 
             path_url = f"{Constants.GET_ORDERS}/{tracked_order.exchange_order_id}/cancel"
+
             self.logger().info(f"line 1000 path_url = {path_url}, order_id = {order_id}, tracked_order.exchange_order_id = {tracked_order.exchange_order_id} ")
 
             cancel_result = await self._api_request("POST", path_url=path_url)
@@ -1004,9 +1012,10 @@ cdef class PeatioExchange(ExchangeBase):
         assert path_url is not None
 
         url = f"{Constants.REST_URL}{path_url}"
-#PMC    
-#        self.logger().info(f"PMC line 1020 _api_request( url={url}, http_method={http_method}, params={params})")
-   
+#        url = f"{Constants.REST_URL}{path_url}"
+#PMC
+        self.logger().info(f"PMC line 1020 _api_request( url={url}, http_method={http_method}, params={params})")
+
         content_type = "application/json" if http_method == "post" else "application/x-www-form-urlencoded"
         headers = {"Content-Type": content_type}
         headers = self.peatio_auth.generate_auth_dict()
@@ -1020,11 +1029,14 @@ cdef class PeatioExchange(ExchangeBase):
                                   timeout=Constants.API_CALL_TIMEOUT) as response:
 
             try:
+                self.logger().info(f"PMC _api_request line 1033 await response.json( url={url})")
+
                 data = await response.json(content_type=None)
-#                self.logger().info(f"PMC line 1087 await response.json( data={data})")
+
+                self.logger().info(f"PMC line 1036 await response.json( data={data})")
 
             except Exception as e:
-                raise PeatioAPIException(f"Malformed response. Expected JSON got:{await response.text()}",
+                raise PeatioAPIException(f"Malformed response. Expected JSON got: {await response.text()}",
                                             status_code=response.status,
                                             malformed=True)
 
